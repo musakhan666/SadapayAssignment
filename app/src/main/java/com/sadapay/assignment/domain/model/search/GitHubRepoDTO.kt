@@ -2,6 +2,7 @@ package com.sadapay.assignment.domain.model.search
 
 import com.sadapay.assignment.data.remote.dto.search.Owner
 
+// domain Clean Model
 data class GitHubRepo(
     val id: Int? = null,
     val name: String? = null,
