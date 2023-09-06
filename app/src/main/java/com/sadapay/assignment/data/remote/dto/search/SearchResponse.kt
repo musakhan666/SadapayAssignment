@@ -3,7 +3,7 @@ package com.sadapay.assignment.data.remote.dto.search
 import com.sadapay.assignment.data.remote.dto.base.BaseListBody
 import com.sadapay.assignment.data.remote.dto.base.BaseResponse
 
-typealias SearchResponse = BaseResponse<BaseListBody<GitHubRepoDTO>>
+typealias SearchResponse = BaseResponse<GitHubRepoDTO>
 
 data class GitHubRepoDTO(
     val id: Int? = null,

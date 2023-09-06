@@ -9,6 +9,6 @@ interface MainRepository {
     suspend fun getTrendingListing(
         query: String,
         sortBy: String
-    ): ApiResult<List<GitHubRepo>>
+    ): ApiResult<GitHubRepo>
 
 }

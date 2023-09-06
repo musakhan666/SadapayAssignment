@@ -10,7 +10,12 @@ import retrofit2.Response
 import java.io.IOException
 
 sealed class ApiResult<out T> {
-    class Success<T>(val data: T, val headers: Headers? = null) : ApiResult<T>() {}
+    class Success<T>(
+        val data: List<T>? = null,
+        val headers: Headers? = null,
+        val totalCount: Int? = null
+    ) :
+        ApiResult<T>() {}
 
     class Error(val error: Exception) : ApiResult<Nothing>()
 }
@@ -24,12 +29,6 @@ fun Throwable.getApiErrorMessage() =
         else -> UiText.StringResource(R.string.general_error_unknown)
     }
 
-fun <T, G> ApiResult<T>.mapDtoToDomain(mapper: T.() -> G): ApiResult<G> {
-    return when (this) {
-        is ApiResult.Error -> this
-        is ApiResult.Success -> ApiResult.Success(this.data.mapper())
-    }
-}
 
 //To be used in remote api calls
 suspend fun <T> safeApiGenericResult(
@@ -39,7 +38,7 @@ suspend fun <T> safeApiGenericResult(
     response = call.invoke()
     return try {
         when {
-            response.isSuccessful -> ApiResult.Success(response.body()!!, response.headers())
+            response.isSuccessful -> ApiResult.Success(emptyList(), response.headers())
 
             response.errorBody() != null -> {
                 val exception = Exception(response.errorBody().toString())
@@ -72,13 +71,16 @@ suspend fun <T, G : BaseResponse<T>> safeApiBaseResult(
             }
             response.isSuccessful -> {
                 when {
-                    response.body()?.status != "success" ->
+                    response.body()?.items.isNullOrEmpty() ->
                         ApiResult.Error(Exception((response.body() as BaseResponse<*>).getErrorMessages()))
-                    //Generic error needs fixing from backend
-                    response.body()?.body == null ->
+                    response.body() == null ->
                         ApiResult.Error(Exception())
                     else ->
-                        ApiResult.Success(response.body()!!.body!!, response.headers())
+                        ApiResult.Success(
+                            response.body()!!.items!!,
+                            response.headers(),
+                            response.body()?.total
+                        )
                 }
             }
 

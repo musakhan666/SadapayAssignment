@@ -1,13 +1,13 @@
 package com.sadapay.assignment.data.repository
 
+import android.util.Log
 import com.sadapay.assignment.data.local.AppDatabase
 import com.sadapay.assignment.data.mapper.toCreateTrendingGithubModels
-import com.sadapay.assignment.data.remote.ApiResult
-import com.sadapay.assignment.data.remote.RemoteApi
-import com.sadapay.assignment.data.remote.dto.base.BaseListBody
+import com.sadapay.assignment.data.mapper.toDomainModel
+import com.sadapay.assignment.data.remote.*
+import com.sadapay.assignment.data.remote.dto.base.BaseResponse
 import com.sadapay.assignment.data.remote.dto.search.GitHubRepoDTO
-import com.sadapay.assignment.data.remote.mapDtoToDomain
-import com.sadapay.assignment.data.remote.safeApiBaseResult
+import com.sadapay.assignment.data.remote.dto.search.SearchResponse
 import com.sadapay.assignment.domain.model.search.GitHubRepo
 import com.sadapay.assignment.domain.repository.MainRepository
 import com.sadapay.assignment.utils.ResourceProvider
@@ -21,14 +21,22 @@ class MainRepositoryImpl @Inject constructor(
     private val resourceProvider: ResourceProvider,
 ) : MainRepository {
     override suspend fun getTrendingListing(
-        query: String,
-        sortBy: String
-    ): ApiResult<List<GitHubRepo>> {
-        val result: ApiResult<BaseListBody<GitHubRepoDTO>> = safeApiBaseResult {
+        query: String, sortBy: String
+    ): ApiResult<GitHubRepo> {
+        val result: ApiResult<GitHubRepoDTO> = safeApiBaseResult {
             remoteApi.searchRepositories(query, sortBy)
         }
         //Map the DTO to the domain model to maintain clean architecture
-        return result.mapDtoToDomain { toCreateTrendingGithubModels() }
+        val mappedResult: ApiResult<GitHubRepo> = when (result) {
+            is ApiResult.Error -> ApiResult.Error(result.error)
+            is ApiResult.Success -> {
+                val mappedData = result.data?.toCreateTrendingGithubModels()
+                ApiResult.Success(mappedData, totalCount = result.totalCount)
+            }
+        }
+
+
+        return mappedResult
     }
 
 

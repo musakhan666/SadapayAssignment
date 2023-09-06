@@ -8,7 +8,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
@@ -70,10 +69,3 @@ private fun NavGraphBuilder.zooziAppGraph(
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    SadapayAssignmentTheme {
-
-    }
-}
