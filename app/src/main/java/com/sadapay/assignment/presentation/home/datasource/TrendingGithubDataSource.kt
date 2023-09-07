@@ -37,8 +37,6 @@ class TrendingGithubDataSource(
                 )
             }
             is ApiResult.Error -> {
-                Log.i("HomeScreen", result.error.localizedMessage)
-
                 LoadResult.Error(result.error)
             }
 
