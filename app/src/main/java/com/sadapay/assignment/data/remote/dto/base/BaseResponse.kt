@@ -13,6 +13,5 @@ open class BaseResponse<T>(
 
     fun getErrorMessages() = getMessages() ?: message
     fun getMessages() = error?.message
-    fun getBody() = items?.toString()
 
 }

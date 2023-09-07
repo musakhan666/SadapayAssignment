@@ -62,7 +62,7 @@ fun ShimmerAnimation(
 }
 
 @Composable
-fun ShimmerItem(brush: Brush) {
+private fun ShimmerItem(brush: Brush) {
     Card(
         modifier = Modifier
             .padding(vertical = 8.dp, horizontal = 16.dp)

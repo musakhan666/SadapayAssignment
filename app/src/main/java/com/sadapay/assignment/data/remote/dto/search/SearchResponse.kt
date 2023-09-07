@@ -1,6 +1,5 @@
 package com.sadapay.assignment.data.remote.dto.search
 
-import com.sadapay.assignment.data.remote.dto.base.BaseListBody
 import com.sadapay.assignment.data.remote.dto.base.BaseResponse
 
 typealias SearchResponse = BaseResponse<GitHubRepoDTO>

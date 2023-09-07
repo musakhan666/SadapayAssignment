@@ -9,15 +9,16 @@ import com.sadapay.assignment.domain.model.search.GitHubRepo
 import com.sadapay.assignment.domain.model.search.GithubRepoRequestBody
 import com.sadapay.assignment.domain.repository.MainRepository
 import com.sadapay.assignment.presentation.BaseViewModel
+import com.sadapay.assignment.presentation.home.datasource.TrendingGithubDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(val repository: MainRepository) : BaseViewModel() {
+class HomeViewModel @Inject constructor(private val repository: MainRepository) : BaseViewModel() {
 
-    fun getTrendingGithubs(): Flow<PagingData<GitHubRepo>> {
+    fun getTrendingGithubProfiles(): Flow<PagingData<GitHubRepo>> {
         return Pager(
             PagingConfig(
                 pageSize = 24, initialLoadSize = 30, prefetchDistance = 30, maxSize = 84

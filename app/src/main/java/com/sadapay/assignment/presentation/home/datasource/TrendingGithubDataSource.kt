@@ -1,5 +1,6 @@
-package com.sadapay.assignment.presentation.home
+package com.sadapay.assignment.presentation.home.datasource
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.sadapay.assignment.data.remote.ApiResult
@@ -35,7 +36,11 @@ class TrendingGithubDataSource(
                     nextKey = if (hasMore == true) page.plus(1) else null
                 )
             }
-            is ApiResult.Error -> LoadResult.Error(result.error)
+            is ApiResult.Error -> {
+                Log.i("HomeScreen", result.error.localizedMessage)
+
+                LoadResult.Error(result.error)
+            }
 
 
         }

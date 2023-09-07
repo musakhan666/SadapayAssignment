@@ -1,5 +1,6 @@
 package com.sadapay.assignment.presentation.home
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,12 +8,14 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -36,30 +39,11 @@ fun HomePageScreen(
 ) {
     val isRefreshing = remember { mutableStateOf(false) }
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing.value)
-    val trendingGithubItems = viewModel.getTrendingGithubs().collectAsLazyPagingItems()
-    val showLoadingDialog = remember { mutableStateOf(false) }
-    val showRetry = remember { mutableStateOf(false) }
-
-
-    fun showLoading() {
-        showLoadingDialog.value = true
-    }
-
-    fun hideLoading() {
-        showLoadingDialog.value = false
-        isRefreshing.value = false
-        showRetry.value = false
-
-    }
-
-    fun refresh() {
-        trendingGithubItems.refresh()
-        showLoading()
-        showRetry.value = false
-    }
+    val trendingGithubItems = viewModel.getTrendingGithubProfiles().collectAsLazyPagingItems()
+    val context = LocalContext.current
 
     fun LazyListScope.githubItems(items: LazyPagingItems<GitHubRepo>) {
-        hideLoading()
+        isRefreshing.value = false
         if (!items.itemSnapshotList.items.isNullOrEmpty()) {
             items(
                 count = items.itemCount,
@@ -77,32 +61,32 @@ fun HomePageScreen(
     SwipeRefresh(
         state = swipeRefreshState, onRefresh = {
             isRefreshing.value = true
-            refresh()
+            trendingGithubItems.refresh()
         }, modifier = Modifier.fillMaxSize()
     ) {
-        LazyColumn(
-            modifier = Modifier.navigationBarsPadding().fillMaxSize().background(Color.White)
-        ) {
-            item {
-                Column {
-                    TopBar()
-                    Spacer(Modifier.height(20.dp))
-                }
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            topBar = {
+                topBar()
 
             }
-            when {
-                !showLoadingDialog.value && !showRetry.value -> {
-                    when (trendingGithubItems.loadState.refresh) {
-                        is LoadState.Loading -> {}
-                        is LoadState.Error -> {
-                            hideLoading()
-                            showRetry.value = true
-                        }
-                        else -> githubItems(trendingGithubItems)
+        ) { paddings ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddings)
+                    .fillMaxSize()
+            ) {
+                when (trendingGithubItems.loadState.refresh) {
+                    is LoadState.Loading -> { item { ShimmerAnimation() } }
+                    is LoadState.Error -> {
+                        item { retryScreen { trendingGithubItems.refresh() } }
+                        Toast.makeText(context, "Error: ${(trendingGithubItems.loadState.refresh as LoadState.Error).error.message}", Toast.LENGTH_SHORT).show()
+
                     }
+                    else -> githubItems(trendingGithubItems)
                 }
-                showLoadingDialog.value -> item { ShimmerAnimation() }
-                showRetry.value -> item { retryScreen { refresh() } }
             }
         }
     }
@@ -111,7 +95,7 @@ fun HomePageScreen(
 }
 
 @Composable
-fun TopBar(
+private fun topBar(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -122,7 +106,6 @@ fun TopBar(
             Row(
                 modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 20.dp).fillMaxWidth()
             ) {
-
                 MediumTitle(
                     modifier = Modifier.padding(start = 8.dp, end = 8.dp).fillMaxWidth().weight(1f)
                         .align(Alignment.CenterVertically),
@@ -139,11 +122,8 @@ fun TopBar(
                 )
 
             }
-
             Spacer(modifier = Modifier.height(15.dp))
             Divider(modifier = Modifier.height(1.dp).fillMaxWidth().background(color = Color.Gray))
-
-
         }
 
 
